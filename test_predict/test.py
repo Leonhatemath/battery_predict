@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 df = pd.read_parquet("../data/battery_mean_soh.parquet", engine='pyarrow')
 df = df.dropna()
