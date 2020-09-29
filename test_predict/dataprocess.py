@@ -7,7 +7,7 @@ import csv
 def getdata(df):
     # df = pd.read_csv("../example_data/shanghai_1990-12-19_to_2019-2-28.csv")
     # df = pd.read_parquet("../data/battery_mean_soh.parquet", engine='pyarrow').dropna()
-    df = df.loc[df["device_id"] == "001f4b95-c5b0-4f9a-82c6-19f06d0b3596", :].dropna()
+    df = df.loc[df["device_id"] == "0cab3eb0-9ef5-4e84-be7f-768fddd428e6", :].dropna()
     df = df.sort_values("date")
     print(df.head())
     df["date"] = df["date"].map(lambda x: x[:4] + "-" + x[4:6] + "-" + x[6:])
@@ -38,12 +38,11 @@ def getDescData(df):
     groupByDevice = df.groupby('device_id')
     deviceIds = {}
     for deviceId, group in groupByDevice:
-        print("group:",group.head())
-        group.sort_values('date', ascending=True)
-        print(group['date'])
-        soh = group['mean_soh']
+        if group.shape[0] < 30:continue
+        group = group.sort_values('date', ascending=True)
+        soh = list(group['mean_soh'])
         model = group.iloc[0, 0]
-        if (x >= y for x, y in zip(soh, soh[1:])):
+        if all(x <= y for x, y in zip(soh, soh[1:])):
             if not (model in deviceIds.keys()):
                 deviceIds[model] = []
             deviceIdList = deviceIds.get(model)
@@ -60,5 +59,5 @@ def getDescData(df):
 
 if __name__ == '__main__':
     df = pd.read_parquet("../data/mean_soh.parquet", engine='pyarrow').dropna()
-    # getdata(df)
-    getDescData(df)
+    getdata(df)
+    # getDescData(df)
