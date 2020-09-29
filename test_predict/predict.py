@@ -52,7 +52,7 @@ def holtWinter():
 
 def SARIMA():
     fit = sm.tsa.statespace.SARIMAX(train.mean_soh, order=(2, 1, 4), seasonal_order=(0, 1, 1, 7)).fit()
-    predict[value] = fit.predict(start="2020-08-24", end='2020-09-18', dynamic=True)
+    predict[value] = fit.predict(start="2020-08-24", end='2020-09-19', dynamic=True)
     return train, test, predict
 
 def predict_method(way):
@@ -81,5 +81,5 @@ def time_series_predict(way):
 if __name__ == '__main__':
     # 朴素法：native_way;简单平均：native_avg;移动平均：move_avg;简单指数平滑法：ses;
     # 霍尔特线性趋势：holtLiner;霍尔特季节性预测模型：holtWinter;自回归移动平均模型：SARIMA
-    way = "SARIMA"
+    way = "ses"
     time_series_predict(way)
