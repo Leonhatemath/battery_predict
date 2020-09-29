@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 import statsmodels.api as sm
+import pandas as pd
 
 # 用前一天的数据作为下一天的预测数据
 
@@ -11,7 +12,8 @@ count = 'mean_soh'
 Train = 'Train'
 Test = 'Test'
 value = 'value'
-train, test = getdata()
+df = pd.read_parquet("../data/mean_soh.parquet", engine='pyarrow').dropna()
+train, test = getdata(df)
 predict = test.copy()
 
 
@@ -45,14 +47,14 @@ def holtLiner():
 
 
 def holtWinter():
-    fit = ExponentialSmoothing(np.asarray(train[count]), seasonal_periods=7, trend='add', seasonal='add').fit()
+    fit = ExponentialSmoothing(np.asarray(train[count]), seasonal_periods=1, trend='add', seasonal='add').fit()
     predict[value] = fit.forecast(len(test))
     return train, test, predict
 
 
 def SARIMA():
     fit = sm.tsa.statespace.SARIMAX(train.mean_soh, order=(2, 1, 4), seasonal_order=(0, 1, 1, 7)).fit()
-    predict[value] = fit.predict(start="2020-08-24", end='2020-09-19', dynamic=True)
+    predict[value] = fit.predict(start="2020-08-26", end='2020-09-18', dynamic=True)
     return train, test, predict
 
 def predict_method(way):
@@ -81,5 +83,5 @@ def time_series_predict(way):
 if __name__ == '__main__':
     # 朴素法：native_way;简单平均：native_avg;移动平均：move_avg;简单指数平滑法：ses;
     # 霍尔特线性趋势：holtLiner;霍尔特季节性预测模型：holtWinter;自回归移动平均模型：SARIMA
-    way = "ses"
+    way = "SARIMA"
     time_series_predict(way)
