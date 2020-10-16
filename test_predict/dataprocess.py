@@ -3,36 +3,39 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
+from datetime import datetime
 
 
-def getdata(df):
+def getdata(df, deviceId):
     # df = pd.read_csv("../example_data/shanghai_1990-12-19_to_2019-2-28.csv")
     # df = pd.read_parquet("../data/battery_mean_soh.parquet", engine='pyarrow').dropna()
-    df = df.loc[df["device_id"] == "384bcb86-ac9c-42da-a1c3-cd6e68186a06", :].dropna()
+    df = df.loc[df["device_id"] == deviceId, :].dropna().loc[:, ['date', 'mean_soh']]
     df = df.sort_values("date")
-    print(df.head())
     df["date"] = df["date"].map(lambda x: x[:4] + "-" + x[4:6] + "-" + x[6:])
     df.date = pd.to_datetime(df.date, format='%Y-%m-%d')
     df.index = df.date
     df["mean_soh"] = df["mean_soh"].astype(float).round(decimals=2)
+    print(df.head())
     df.info()
 
-    num = int(len(df) / 5 * 4)
+    num = int(df.shape[0] / 5 * 4)
     train = df[:num]
     train.index = train.date
+    tra_end = train.index[-1]
     train.mean_soh.plot(figsize=(35, 8), title='Daily mean_soh', fontsize=6)
     print("train:")
     train.info()
 
     test = df[num:]
     test.index = test.date
+    tes_end = df.shape[0] - num
     test.mean_soh.plot(figsize=(35, 8), title='Daily mean_soh', fontsize=6)
     print("test:")
     test.info()
 
     plt.show()
 
-    return train, test
+    return train, test, tra_end, tes_end
 
 
 def getDescData(df):
@@ -51,18 +54,22 @@ def getDescData(df):
             deviceIdList.append(deviceId)
             deviceIds[model] = deviceIdList
 
-    with open('../data/deviceIds.csv', 'w') as f:
+    with open('../data/old_deviceIds.csv', 'w') as f:
         w = csv.writer(f)
         for key, value in deviceIds.items():
             w.writerow([key, value])
 
     f.close()
 
+
 def upOrDown(x, y):
-    a, b = np.polyfit(x,y,1)
+    a, b = np.polyfit(x, y, 1)
     return a < 0
 
+
 if __name__ == '__main__':
-    df = pd.read_parquet("../data/mean_soh.parquet", engine='pyarrow').dropna()
-    getdata(df)
+    # 比较好得一些数据：["00cc4087-af9b-4cfa-a378-c0ced676b44e",]
+    df = pd.read_parquet("../data/old_mean_soh.parquet", engine='pyarrow').dropna()
+    deviceId = "00cc4087-af9b-4cfa-a378-c0ced676b44e"
+    getdata(df, deviceId)
     # getDescData(df)
