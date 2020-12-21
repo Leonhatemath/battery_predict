@@ -12,9 +12,12 @@ count = 'mean_soh'
 Train = 'Train'
 Test = 'Test'
 value = 'value'
-df = pd.read_parquet("../data/old_mean_soh.parquet", engine='pyarrow').dropna()
-deviceId = "00cc4087-af9b-4cfa-a378-c0ced676b44e"
-train, test, tra_end, tes_end = getdata(df, deviceId)
+df = pd.read_parquet("../data/20201221soh_by_date.parquet", engine='pyarrow').dropna()
+df1 = pd.read_parquet("../data/20201221soh_by_cyclecount.parquet", engine='pyarrow').dropna()
+# deviceId = "00cc4087-af9b-4cfa-a378-c0ced676b44e"
+model = 'Mi 10 Pro'
+# train, test, tra_end, tes_end = getdata(df, None, model)
+train, test, tra_end, tes_end = getdata(df1, model)
 predict = test.copy()
 
 
@@ -98,5 +101,5 @@ def time_series_predict(way):
 if __name__ == '__main__':
     # 朴素法：native_way;简单平均：native_avg;移动平均：move_avg;简单指数平滑法：ses;
     # 霍尔特线性趋势：holtLiner;霍尔特季节性预测模型：holtWinter;自回归移动平均模型：ARIMA
-    way = "holtWinter"
+    way = "holtLiner"
     time_series_predict(way)
